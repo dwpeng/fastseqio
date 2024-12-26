@@ -54,7 +54,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [windows-latest]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -65,14 +65,8 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install dependencies
-        if: matrix.os == 'windows-latest'
         run: |
           Invoke-Expression (Invoke-Webrequest 'https://xmake.io/psget.text' -UseBasicParsing).Content
-      - name: Install xmake
-        if: matrix.os == 'macos-latest'
-        run: |
-          ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-          brew install xmake
 
       - name: Build wheels
         run: |
