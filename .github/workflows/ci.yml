@@ -67,7 +67,9 @@ jobs:
           pkgs: zlib
           triplet: ${{ matrix.triplet }}
           github-binarycache: true
-        run: dir C:\vcpkg\installed\x64-windows-release\bin
+
+      - name: dir list
+        run: dir C:\vcpkg\installed\x64-window-release
 
       - name: Set up Python
         uses: actions/setup-python@v5
