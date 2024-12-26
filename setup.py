@@ -1,36 +1,35 @@
 import setuptools
 import platform
 import re
-import subprocess
-import shutil
+import os
 
 def get_shared_lib_path():
-    shutil.rmtree("build", ignore_errors=True)
-    p = subprocess.run(["xmake", "clean"], check=True)
-    p = subprocess.Popen(
-        ["xmake build -v"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
-    out, err = p.communicate()
-    if p.returncode != 0:
-        raise RuntimeError("Failed to build the shared library")
-    out = out.decode("utf-8") + err.decode("utf-8")
-    shared_lib_path = re.findall(r"-o ([\w\/\.]+[\.a-z]+)", out)
-    return shared_lib_path[-1]
+    for root, dirs, files in os.walk("build"):
+        for file in files:
+            if re.search(r"\.(pyd|so|dylib)$", file):
+                return os.path.join(root, file)
+    raise FileNotFoundError("Shared library not found")
 
-# Copy the shared library to the package directory
+
+def copy_file(src, dst):
+    with open(src, "rb") as f:
+        with open(dst, "wb") as g:
+            g.write(f.read())
+    print(f"Copy {src} to {dst}")
+
+
 if platform.system() == "Darwin" or platform.system() == "Windows":
     extension = []
     shared_lib_path = get_shared_lib_path()
-    if platform.system() == "Darwin":
-        subprocess.run(
-            ["cp", shared_lib_path, "./python/src/fastseqio/_fastseqio.dylib"], check=True
-        )
-    elif platform.system() == "Windows":
-        subprocess.run(
-            ["copy", shared_lib_path, "./python/src/fastseqio/_fastseqio.pyd"],
-            check=True,
-        )
-    package_data = ({"fastseqio": ["*.so", "*.pyd", "*.dylib"]},)
+    print("###########################")
+    print(shared_lib_path)
+    print("###########################")
+    target_path = "./python/src/fastseqio/_fastseqio"
+    suffix = os.path.splitext(shared_lib_path)[1]
+    target_path += suffix
+    copy_file(shared_lib_path, target_path)
+    package_data = {"fastseqio": ["*.so", "*.pyd", "*.dylib"]}
+
 elif platform.system() == "Linux":
     extension = [
         setuptools.Extension(
