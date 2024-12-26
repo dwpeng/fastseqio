@@ -1,4 +1,4 @@
-from _fastseqio import (
+from ._fastseqio import (
     seqioFile as _seqioFile,
     seqOpenMode as _seqOpenMode,
     seqioRecord as _seqioRecord,
