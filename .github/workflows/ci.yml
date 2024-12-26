@@ -76,4 +76,6 @@ jobs:
 
       - name: Build wheels
         run: |
+          xmake f -m release
+          xmake p
           pip wheel . -w wheelhouse
