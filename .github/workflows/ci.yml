@@ -49,17 +49,26 @@ jobs:
           CIBW_MANYLINUX_*_IMAGE: ${{ matrix.manylinux-image }}
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.manylinux-image }}
 
-  build-wheels-macos-windows:
+  build-wheels-windows:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # os: [macos-latest, macos-13, windows-latest]
         os: [windows-latest]
+        triplet: [x64-windows-release]
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Set zlib by vcpkg
+        uses: johnwason/vcpkg-action@v6
+        with:
+          pkgs: zlib
+          triplet: ${{ matrix.triplet }}
+          github-binarycache: true
+        run: dir C:\vcpkg\installed\x64-windows-release\bin
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -77,13 +86,4 @@ jobs:
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_BUILD: cp310-* cp311-* cp312-* cp313-* cp313t-*
-          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15
-          CIBW_FREE_THREADED_SUPPORT: 1
-
-      - name: Build wheels
-        if: matrix.os != 'macos-latest'
-        run: python -m cibuildwheel --output-dir wheelhouse
-        env:
-          CIBW_BUILD: cp39-* cp310-* cp311-* cp312-* cp313-* cp313t-*
-          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=11.0
           CIBW_FREE_THREADED_SUPPORT: 1

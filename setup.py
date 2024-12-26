@@ -1,4 +1,23 @@
 import setuptools
+import platform
+
+is_windows = platform.system() == "Windows"
+
+
+def find_zlib_path_on_windows() -> str:
+    import os
+    zlib_path = os.path.join("vcpkg", "installed", "x64-windows-release", "lib")
+    return os.path.join("C:", zlib_path)
+
+
+libraries = []
+library_dirs = []
+if is_windows:
+    library_dirs.append(find_zlib_path_on_windows())
+    libraries.append("zlib")
+else:
+    libraries.append("z")
+
 
 extensions = [
     setuptools.Extension(
@@ -6,7 +25,8 @@ extensions = [
         sources=["./python/fastseqio.cc", "seqio.c"],
         include_dirs=[".", "python/pybind11/include"],
         extra_compile_args=[],
-        extra_link_args=["-lz", "-lm"],
+        libraries=libraries,
+        library_dirs=library_dirs,
     )
 ]
 
