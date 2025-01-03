@@ -3,6 +3,7 @@ import platform
 import re
 import os
 
+
 def get_shared_lib_path():
     for root, dirs, files in os.walk("build"):
         for file in files:
@@ -36,7 +37,7 @@ elif platform.system() == "Linux":
             "_fastseqio",
             sources=["./seqio.c", "./python/fastseqio.cc"],
             include_dirs=[".", "python/pybind11/include"],
-            extra_compile_args=["-lz"],
+            extra_link_args=["-lz"],
         )
     ]
     package_data = {}

@@ -1,8 +1,23 @@
-from ._fastseqio import (
-    seqioFile as _seqioFile,
-    seqOpenMode as _seqOpenMode,
-    seqioRecord as _seqioRecord,
-)
+import sys
+
+if sys.platform == "win32" or sys.platform == "darwin":
+    # from ._fastseqio import (
+    #     seqioFile as _seqioFile,
+    #     seqOpenMode as _seqOpenMode,
+    #     seqioRecord as _seqioRecord,
+    # )
+    print("Unsupported platform: ", sys.platform)
+    exit(1)
+elif sys.platform == "linux":
+    from _fastseqio import (
+        seqioFile as _seqioFile,
+        seqOpenMode as _seqOpenMode,
+        seqioRecord as _seqioRecord,
+    )
+else:
+    print("Unsupported platform")
+    exit(1)
+
 from typing import Optional, Literal
 
 
@@ -126,6 +141,7 @@ class seqioFile:
         path: str,
         mode: Literal["w", "r"] = "r",
         compressed: bool = False,
+        valid_chars: Optional[str] = None,
     ):
         if mode not in ["r", "w"]:
             raise ValueError("Invalid mode. Must be 'r' or 'w'")
@@ -133,10 +149,14 @@ class seqioFile:
             self.__mode = seqioOpenMode.WRITE
         else:
             self.__mode = seqioOpenMode.READ
+        if valid_chars is None:
+            valid_chars = ""
+        else:
+            assert type(valid_chars) is str, "valid_chars must be a string"
         if path == "-":
-            self.__file = _seqioFile("", self.__mode, compressed)
+            self.__file = _seqioFile("", self.__mode, compressed, valid_chars)
             return
-        self.__file = _seqioFile(path, self.__mode, compressed)
+        self.__file = _seqioFile(path, self.__mode, compressed, valid_chars)
 
     @property
     def readable(self):
@@ -217,7 +237,7 @@ class seqioFile:
 
 class seqioStdinFile(seqioFile):
     def __init__(self):
-        self.__file = _seqioFile("", seqioOpenMode.READ, False)
+        self.__file = _seqioFile("", seqioOpenMode.READ, False, None)
         self.__mode = seqioOpenMode.READ
 
     def reset(self):
