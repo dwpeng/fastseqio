@@ -74,6 +74,9 @@ main(int argc, char* argv[])
   seqioOpenOptions openOptions = {
     .filename = argv[1],
     .mode = seqOpenModeRead,
+    // optional, valid characters in sequence
+    // default: "A-Za-z"
+    .validChars = "ACGTNagctn",
   };
   // Step2: open file
   seqioFile* sf = seqioOpen(&openOptions);
