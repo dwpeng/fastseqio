@@ -156,6 +156,8 @@ class seqioFile:
         if path == "-":
             self.__file = _seqioFile("", self.__mode, compressed, valid_chars)
             return
+        if path.lower().endswith(".gz"):
+            compressed = True
         self.__file = _seqioFile(path, self.__mode, compressed, valid_chars)
 
     @property

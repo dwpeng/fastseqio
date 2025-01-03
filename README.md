@@ -77,6 +77,7 @@ def test_write():
     os.remove("out.fa")
 
 def test_write_gz():
+    # compress by extension or let `compressed=True`
     file = seqioFile("out.fa.gz", "w")
 
     record = Record("test", "ACGGGGGGGTTTT")
@@ -85,12 +86,14 @@ def test_write_gz():
     file.writeFasta(record)
 
     file.close()
+    import gzip
 
     content = ">test\nACGGGGGGGTTTT\n>test\nACGGGGGGGTTTT\n"
 
     with open("out.fa.gz", "rb") as fp:
         data = fp.read()
-        assert data == content.encode()
+        data = gzip.decompress(data).decode("utf-8")
+        assert data == content
 
     os.remove("out.fa.gz")
 
