@@ -9,6 +9,7 @@ read()
     .isGzipped = false,
     .mode = seqOpenModeRead,
     .freeRecordOnEOF = true,
+    .validChars = NULL
   };
   seqioFile* sf = seqioOpen(&openOptions);
   seqioRecord* record = NULL;

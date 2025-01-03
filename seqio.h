@@ -37,9 +37,9 @@ typedef enum {
 } seqioRecordType;
 
 typedef struct {
+  char* data;
   size_t length;
   size_t capacity;
-  char* data;
 } seqioString;
 
 typedef struct {
@@ -60,6 +60,7 @@ typedef struct {
   bool isGzipped;
   seqOpenMode mode;
   bool freeRecordOnEOF;
+  char* validChars;
 } seqioOpenOptions;
 
 typedef enum {
@@ -93,6 +94,7 @@ typedef struct {
     void* file;
     seqOpenMode mode;
   } pravite;
+  char* validChars;
 } seqioFile;
 
 #define defaultSeqioWriteOptions                                              \

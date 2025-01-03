@@ -11,6 +11,7 @@ main(int argc, char* argv[])
   seqioOpenOptions openOptions = {
     .filename = argv[1],
     .mode = seqOpenModeRead,
+    .validChars = "at"
   };
   seqioFile* sf = seqioOpen(&openOptions);
   seqioRecord* record = NULL;
