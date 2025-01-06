@@ -1,4 +1,4 @@
-name: wheels
+name: ci
 
 on:
   push:
@@ -48,26 +48,3 @@ jobs:
           CIBW_ARCHS: ${{ matrix.arch }}
           CIBW_MANYLINUX_*_IMAGE: ${{ matrix.manylinux-image }}
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.manylinux-image }}
-
-  build-wheels-windows:
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Build wheels
-        run: |
-          Invoke-Expression (Invoke-Webrequest 'https://xmake.io/psget.text' -UseBasicParsing).Content
-          xmake f -m release
-          xmake p -y
-          pip wheel . -w wheelhouse
