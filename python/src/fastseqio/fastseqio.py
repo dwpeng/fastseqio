@@ -84,7 +84,7 @@ class Record:
         return self
 
     def __len__(self):
-        return len(self.sequence or "")
+        return self.__record.length()
 
     def length(self) -> int:
         return self.__record.length()
