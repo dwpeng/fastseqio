@@ -115,21 +115,97 @@ class Record:
         return self.__record.length()
 
     def upper(self, inplace: bool = False) -> str:
+        """
+        Convert the sequence to uppercase.
+
+        Args:
+          inplace (bool): If True, modify the sequence in place. Defaults to False.
+
+        Returns:
+          str: The uppercase version of the sequence.
+
+        Examples:
+          >>> seq = Record("name", "acgt")
+          >>> seq.upper()
+          'ACGT'
+          >>> seq.sequence
+          'acgt'
+          >>> seq.upper(inplace=True)
+          'ACGT'
+          >>> seq.sequence
+          'ACGT'
+        """
         if inplace:
             self.sequence = self.__record.upper()
             return self.sequence
         return self.__record.upper()
 
     def lower(self, inplace: bool = False) -> str:
+        """
+        Convert the sequence to lowercase.
+
+        Args:
+            inplace (bool): If True, modify the sequence in place. Default is False.
+
+        Returns:
+            str: The lowercase version of the sequence.
+
+        Examples:
+            >>> seq = Record("name", "ATGC")
+            >>> seq.lower()
+            'atgc'
+            >>> seq.sequence
+            'ATGC'
+            >>> seq.lower(inplace=True)
+            'atgc'
+            >>> seq.sequence
+            'atgc'
+        """
         if inplace:
             self.sequence = self.__record.lower()
             return self.sequence
         return self.__record.lower()
 
     def hpc_commpress(self) -> str:
+        """
+        Compress the sequence using homopolymer compression (HPC).
+
+        Homopolymer compression reduces consecutive identical bases to a single base.
+
+        Returns:
+          str: The homopolymer compressed sequence.
+
+        Examples:
+          >>> record = Record("name", "AAATTTCCCGGG")
+          >>> record.hpc_commpress()
+          'ATCG'
+          >>> record = Record("name", "AAGGTTCC")
+          >>> record.hpc_commpress()
+          'AGTC'
+        """
         return self.__record.hpc()
 
     def reverse(self, inplace: bool = False) -> str:
+        """
+        Reverse the sequence.
+
+        Args:
+            inplace (bool): If True, modify the sequence in place. Default is False.
+
+        Returns:
+            str: The reversed sequence.
+
+        Examples:
+            >>> seq = Record("name", "AGCT")
+            >>> seq.reverse()
+            'TCGA'
+            >>> seq.sequence
+            'AGCT'
+            >>> seq.reverse(inplace=True)
+            'TCGA'
+            >>> seq.sequence
+            'TCGA'
+        """
         if inplace:
             self.sequence = self.__record.reverse()
             return self.sequence
@@ -144,9 +220,30 @@ class Record:
         return self.__record.subseq(start, length)
 
     def subseq(self, start: int, length: int) -> str:
+        """
+        Extracts a subsequence from the record starting at the given index with the specified length.
+
+        Args:
+            start (int): The starting index of the subsequence. If None or 0, starts from the beginning.
+            length (int): The length of the subsequence to extract.
+
+        Returns:
+            str: The extracted subsequence.
+
+        Raises:
+            AssertionError: If the start index is negative or the end index exceeds the length of the record.
+
+        Examples:
+            >>> record = Record("name", "ACGTACGT")
+            >>> record.subseq(2, 4)
+            'GTAC'
+            >>> record.subseq(0, 3)
+            'ACG'
+            >>> record.subseq(4, 2)
+            'AC'
+        """
         start = start or 0
         end = start + length
-        print(start, end, len(self), self.__record.subseq(start, length))
         assert start >= 0, f"Start index {start} out of range"
         assert end <= len(self), f"End index {end} out of range"
         return self.__record.subseq(start, length)
@@ -161,6 +258,32 @@ class Record:
         return self.__record
 
     def kmers(self, k: int):
+        """
+        Generate k-mers of length k from the sequence.
+
+        A k-mer is a substring of length k from the sequence. This method
+        yields all possible k-mers of the given length from the sequence.
+
+        Args:
+            k (int): The length of each k-mer.
+
+        Raises:
+            ValueError: If k is greater than the length of the sequence.
+
+        Yields:
+            str: A k-mer of length k from the sequence.
+
+        Examples:
+            >>> record = Record("id", "ACGT")
+            >>> list(record.kmers(2))
+            ['AC', 'CG', 'GT']
+            >>> list(record.kmers(4))
+            ['ACGT']
+            >>> list(record.kmers(5))
+            Traceback (most recent call last):
+                ...
+            ValueError: K must be less than the record length
+        """
         if k > len(self):
             raise ValueError("K must be less than the record length")
         if k == len(self):
@@ -178,6 +301,26 @@ class seqioFile:
         compressed: bool = False,
         valid_chars: Optional[str] = None,
     ):
+        """
+        Open a fasta/fastq file for reading or writing.
+
+        Parameters:
+            path (str): The path to the file. Use "-" for stdin/stdout.
+            mode (str): The mode to open the file in. Must be 'r' for reading or 'w' for writing. Defaults to 'r'.
+            compressed (bool): If True, the file is compressed. Defaults to False.
+            valid_chars (Optional[str]): A string of valid characters for the sequence. Defaults to None.
+
+        Raises:
+            ValueError: If the mode is not 'r' or 'w'.
+
+        Examples:
+            >>> with seqioFile('/tmp/test.fa', 'w') as writer:
+            ...     writer.writeFasta('seq1', 'ACGT')
+            ...     writer.writeFasta('seq2', 'ACGT')
+            >>> with seqioFile('/tmp/test.fa', 'r') as reader:
+            ...     records = list(reader)
+            ...     assert len(records) == 2
+        """
         if mode not in ["r", "w"]:
             raise ValueError("Invalid mode. Must be 'r' or 'w'")
         if mode == "w":
@@ -209,6 +352,24 @@ class seqioFile:
         return self.__file
 
     def readOne(self):
+        """
+        Reads a single record from the fasta/fastq file.
+
+        If the file is not opened in read mode, raises a ValueError.
+
+        Returns:
+            Record: A Record object created from the read data.
+            None: If no record is found.
+
+        Raises:
+            ValueError: If the file is not opened in read mode.
+
+        Examples:
+            >>> seqio = seqioFile('test-data/test4.fq', 'r')
+            >>> record = seqio.readOne()
+            >>> isinstance(record, Record)
+            True
+        """
         if not self.readable:
             raise ValueError("File not opened in read mode")
         file = self._get_file()
@@ -218,6 +379,24 @@ class seqioFile:
         return Record._fromRecord(record)
 
     def readFasta(self):
+        """
+        Reads a FASTA record from the file.
+
+        If the file is not opened in read mode, raises a ValueError.
+
+        Returns:
+            Record: A Record object created from the FASTA record.
+            None: If no record is found.
+
+        Raises:
+            ValueError: If the file is not opened in read mode.
+
+        Examples:
+            >>> fasta_reader = seqioFile('test-data/test2.fa')
+            >>> record = fasta_reader.readFasta()
+            >>> isinstance(record, Record)
+            True
+        """
         if not self.readable:
             raise ValueError("File not opened in read mode")
         file = self._get_file()
@@ -227,6 +406,26 @@ class seqioFile:
         return Record._fromRecord(record)
 
     def readFastq(self):
+        """
+        Reads a FASTQ record from the file.
+
+        This method reads a single FASTQ record from the file associated with
+        this instance. If the file is not opened in read mode, it raises a
+        ValueError. If there are no more records to read, it returns None.
+
+        Returns:
+            Record: A Record object created from the FASTQ record read from
+            the file, or None if there are no more records.
+
+        Raises:
+            ValueError: If the file is not opened in read mode.
+
+        Example:
+            >>> seqio = seqioFile('test-data/test4.fq')
+            >>> record = seqio.readFastq()
+            >>> isinstance(record, Record)
+            True
+        """
         if not self.readable:
             raise ValueError("File not opened in read mode")
         file = self._get_file()
@@ -242,6 +441,31 @@ class seqioFile:
         quality: Optional[str] = None,
         comment: Optional[str] = None,
     ):
+        """
+        Write a single sequence record to the file in FASTA or FASTQ format.
+
+        Parameters:
+        name (str): The name of the sequence.
+        sequence (str): The sequence data.
+        quality (Optional[str]): The quality scores for the sequence. If provided, the sequence will be written in FASTQ format. Defaults to None.
+        comment (Optional[str]): An optional comment for the sequence. Defaults to None.
+
+        Raises:
+        ValueError: If the file is not opened in write mode.
+        AssertionError: If the length of the sequence and quality scores do not match.
+
+        Examples:
+        >>> writer = seqioFile("/tmp/test.fa", "w")
+        >>> writer.writeOne("seq1", "ATCG")
+        >>> writer.writeOne("seq2", "GCTA", comment="Comment")
+        >>> writer = seqioFile("/tmp/test.fq", "w")
+        >>> writer.writeOne("seq1", "ATCG", "IIII")
+        >>> writer.writeOne("seq2", "GCTA", "IIII", comment="Comment")
+        >>> writer.writeOne("seq3", "GCTA", "IIIII")
+        Traceback (most recent call last):
+            ...
+        AssertionError: Sequence and quality lengths must match
+        """
         if not self.writable:
             raise ValueError("File not opened in write mode")
         file = self._get_file()
