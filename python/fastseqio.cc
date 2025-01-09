@@ -158,9 +158,9 @@ public:
   }
 
   std::string
-  subseq(size_t start, size_t end)
+  subseq(size_t start, size_t length)
   {
-    return sequence.substr(start, end - start);
+    return sequence.substr(start, length);
   }
 
   std::string

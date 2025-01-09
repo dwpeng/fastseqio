@@ -1,6 +1,12 @@
 import sys
 
-if sys.platform == "win32" or sys.platform == "darwin":
+if sys.platform == "linux":
+    from _fastseqio import (
+        seqioFile as _seqioFile,
+        seqOpenMode as _seqOpenMode,
+        seqioRecord as _seqioRecord,
+    )
+elif sys.platform == "win32" or sys.platform == "darwin":
     # from ._fastseqio import (
     #     seqioFile as _seqioFile,
     #     seqOpenMode as _seqOpenMode,
@@ -8,22 +14,37 @@ if sys.platform == "win32" or sys.platform == "darwin":
     # )
     print("Unsupported platform: ", sys.platform)
     exit(1)
-elif sys.platform == "linux":
-    from _fastseqio import (
-        seqioFile as _seqioFile,
-        seqOpenMode as _seqOpenMode,
-        seqioRecord as _seqioRecord,
-    )
 else:
-    print("Unsupported platform")
+    print("Unsupported platform: ", sys.platform)
     exit(1)
 
 from typing import Optional, Literal
 
 
+__all__ = ["Record", "seqioFile", "seqioStdinFile", "seqioStdoutFile"]
+
+
 class seqioOpenMode:
     READ = _seqOpenMode.READ
     WRITE = _seqOpenMode.WRITE
+
+
+class RecordKmerIterator:
+    def __init__(self, record: "Record", k: int):
+        self.__record = record
+        self.__k = k
+        self.__index = 0
+        self.__len = len(record)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.__index >= self.__len - self.__k + 1:
+            raise StopIteration
+        kmer = self.__record.subseq(self.__index, self.__k)
+        self.__index += 1
+        return kmer
 
 
 class Record:
@@ -52,6 +73,7 @@ class Record:
 
     @name.setter
     def name(self, value: str):
+        assert type(value) is str, "Name must be a string"
         self.__record.name = value
 
     @property
@@ -60,6 +82,7 @@ class Record:
 
     @sequence.setter
     def sequence(self, value: str):
+        assert type(value) is str, "Sequence must be a string"
         self.__record.sequence = value
 
     @property
@@ -68,6 +91,7 @@ class Record:
 
     @quality.setter
     def quality(self, value: str):
+        assert type(value) is str, "Quality must be a string"
         self.__record.quality = value
 
     @property
@@ -76,10 +100,11 @@ class Record:
 
     @comment.setter
     def comment(self, value: str):
+        assert type(value) is str, "Comment must be a string"
         self.__record.comment = value
 
     @classmethod
-    def fromRecord(cls, record: _seqioRecord):
+    def _fromRecord(cls, record: _seqioRecord):
         self = cls(record, "")  # type: ignore
         return self
 
@@ -115,24 +140,34 @@ class Record:
             raise TypeError("Index must be a slice")
         start = index.start or 0
         end = index.stop or len(self) - 1
-        if self.__record is not None:
-            return self.__record.subseq(start, end)
-        return self.sequence[start:end]
+        length = end - start + 1
+        return self.__record.subseq(start, length)
 
-    def subseq(self, start: int, end: int) -> str:
+    def subseq(self, start: int, length: int) -> str:
         start = start or 0
-        end = end or len(self) - 1
+        end = start + length
+        print(start, end, len(self), self.__record.subseq(start, length))
         assert start >= 0, f"Start index {start} out of range"
-        assert end <= len(self) - 1, f"End index {end} out of range"
-        if self.__record is not None:
-            return self.__record.subseq(start, end)
-        return self.sequence[start:end]
+        assert end <= len(self), f"End index {end} out of range"
+        return self.__record.subseq(start, length)
 
     def __str__(self):
         return f"seqioRecord(name={self.name})"
 
+    def __repr__(self):
+        return f"seqioRecord(name={self.name}, len={len(self)})"
+
     def _raw(self) -> _seqioRecord:
         return self.__record
+
+    def kmers(self, k: int):
+        if k > len(self):
+            raise ValueError("K must be less than the record length")
+        if k == len(self):
+            yield self.sequence
+            return
+        for kmer in RecordKmerIterator(self, k):
+            yield kmer
 
 
 class seqioFile:
@@ -180,7 +215,7 @@ class seqioFile:
         record = file.readOne()
         if record is None:
             return None
-        return Record.fromRecord(record)
+        return Record._fromRecord(record)
 
     def readFasta(self):
         if not self.readable:
@@ -189,7 +224,7 @@ class seqioFile:
         record = file.readFasta()
         if record is None:
             return None
-        return Record.fromRecord(record)
+        return Record._fromRecord(record)
 
     def readFastq(self):
         if not self.readable:
@@ -198,19 +233,34 @@ class seqioFile:
         record = file.readFastq()
         if record is None:
             return None
-        return Record.fromRecord(record)
+        return Record._fromRecord(record)
 
-    def writeFastq(self, record: Record):
+    def writeOne(
+        self,
+        name: str,
+        sequence: str,
+        quality: Optional[str] = None,
+        comment: Optional[str] = None,
+    ):
         if not self.writable:
             raise ValueError("File not opened in write mode")
         file = self._get_file()
-        file.writeFastq(record._raw())
+        record = _seqioRecord(name, comment or "", sequence, quality or "")
+        if quality is not None:
+            assert len(sequence) == len(
+                quality
+            ), "Sequence and quality lengths must match"
+            file.writeFastq(record)
+        else:
+            file.writeFasta(record)
 
-    def writeFasta(self, record: Record):
-        if not self.writable:
-            raise ValueError("File not opened in write mode")
-        file = self._get_file()
-        file.writeFasta(record._raw())
+    def writeFastq(
+        self, name: str, sequence: str, quality: str, comment: Optional[str] = None
+    ):
+        self.writeOne(name, sequence, quality, comment=comment)
+
+    def writeFasta(self, name: str, sequence: str, comment: Optional[str] = None):
+        self.writeOne(name, sequence, comment=comment)
 
     def __iter__(self):
         file = self._get_file()
@@ -218,7 +268,7 @@ class seqioFile:
             record = file.readOne()
             if record is None:
                 break
-            yield Record.fromRecord(record)
+            yield Record._fromRecord(record)
 
     def close(self):
         if self.__file is None:
@@ -235,6 +285,12 @@ class seqioFile:
         if self.__file is None:
             return
         self.__file.reset()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
 
 class seqioStdinFile(seqioFile):
