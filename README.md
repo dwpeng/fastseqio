@@ -25,10 +25,14 @@ WIP: I'm working on a python wrapper for this library.
 pip install fastseqio
 ```
 
+<details>
+<summary>Click to see the example</summary>
+
 ```py
 import os
 
 from fastseqio import seqioFile, Record
+
 
 def test_read():
     file = seqioFile("test-data/test2.fa")
@@ -61,10 +65,8 @@ def test_read():
 def test_write():
     file = seqioFile("out.fa", "w")
 
-    record = Record("test", "ACGGGGGGGTTTT")
-
-    file.writeFasta(record)
-    file.writeFasta(record)
+    file.writeFasta("test", "ACGGGGGGGTTTT")
+    file.writeFasta("test", "ACGGGGGGGTTTT")
 
     file.close()
 
@@ -76,14 +78,13 @@ def test_write():
 
     os.remove("out.fa")
 
+
 def test_write_gz():
     # compress by extension or let `compressed=True`
     file = seqioFile("out.fa.gz", "w")
 
-    record = Record("test", "ACGGGGGGGTTTT")
-
-    file.writeFasta(record)
-    file.writeFasta(record)
+    file.writeFasta("test", "ACGGGGGGGTTTT")
+    file.writeFasta("test", "ACGGGGGGGTTTT")
 
     file.close()
     import gzip
@@ -96,6 +97,7 @@ def test_write_gz():
         assert data == content
 
     os.remove("out.fa.gz")
+
 
 def test_record():
     record = Record("test", "ACGGGGGGGTTTT")
@@ -125,8 +127,22 @@ def test_record():
     assert record.length() == 20
     assert record.sequence == "ACGGGGGGGTTTTTTTTxxx"
     assert len(record) == 20
-```
 
+    record.sequence = "ACGGGGGGGTTTT"
+
+    sub = record.subseq(2, 5)
+    assert sub == "GGGGG"
+
+
+def test_kmers():
+    record = Record("test", "ACGGGG")
+
+    kmers = list(record.kmers(4))
+    assert len(kmers) == (len(record) - 4 + 1)
+    assert kmers == ["ACGG", "CGGG", "GGGG"]
+
+```
+</details>
 
 ### C
 
