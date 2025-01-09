@@ -44,7 +44,7 @@ elif platform.system() == "Linux":
 
 setuptools.setup(
     name="fastseqio",
-    version="0.0.6",
+    version="0.0.7",
     author="dwpeng",
     author_email="1732889554@qq.com",
     license="MIT",
