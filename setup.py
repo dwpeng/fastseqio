@@ -1,7 +1,7 @@
 import setuptools
-import platform
 import re
 import os
+import sys
 
 
 def get_shared_lib_path():
@@ -19,7 +19,7 @@ def copy_file(src, dst):
     print(f"Copy {src} to {dst}")
 
 
-if platform.system() == "Darwin" or platform.system() == "Windows":
+if sys.platform == "darwin" or sys.platform == "win32":
     extension = []
     shared_lib_path = get_shared_lib_path()
     print("###########################")
@@ -31,7 +31,8 @@ if platform.system() == "Darwin" or platform.system() == "Windows":
     copy_file(shared_lib_path, target_path)
     package_data = {"fastseqio": ["*.so", "*.pyd", "*.dylib"]}
 
-elif platform.system() == "Linux":
+
+elif sys.platform == "linux":
     extension = [
         setuptools.Extension(
             "_fastseqio",
@@ -41,6 +42,8 @@ elif platform.system() == "Linux":
         )
     ]
     package_data = {}
+else:
+    raise ValueError("")
 
 setuptools.setup(
     name="fastseqio",
