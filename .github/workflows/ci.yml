@@ -22,7 +22,7 @@ jobs:
         arch: [x86_64, aarch64]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Set up QEMU
@@ -59,9 +59,9 @@ jobs:
         arch: [AMD64]
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Checkout repository
-        run: git submodule update --init --recursive
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
