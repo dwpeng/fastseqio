@@ -1,0 +1,41 @@
+const std = @import("std");
+
+pub fn build(b: *std.Build) void {
+    const target = b.standardTargetOptions(.{});
+    const mode = b.standardOptimizeOption(.{});
+
+    const zlib = b.addStaticLibrary(.{
+        .name = "z",
+        .target = target,
+        .optimize = mode,
+    });
+
+    zlib.linkLibC();
+    zlib.addIncludePath(b.path("./deps/zlib"));
+    zlib.addCSourceFiles(.{
+        .root = b.path("./deps/zlib"),
+        .files = &[_][]const u8{
+            "adler32.c",
+            "compress.c",
+            "crc32.c",
+            "deflate.c",
+            "gzclose.c",
+            "gzlib.c",
+            "gzread.c",
+            "gzwrite.c",
+            "inflate.c",
+            "infback.c",
+            "inftrees.c",
+            "inffast.c",
+            "trees.c",
+            "uncompr.c",
+            "zutil.c",
+        },
+        .flags = &[_][]const u8{
+            "-std=c89",
+            "-O2",
+        },
+    });
+
+    b.installArtifact(zlib);
+}

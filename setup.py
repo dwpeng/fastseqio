@@ -1,44 +1,24 @@
 import setuptools
-import re
-import os
+
 import sys
 
-
-def get_shared_lib_path():
-    for root, dirs, files in os.walk("build"):
-        for file in files:
-            if re.search(r"\.(pyd|so|dylib)$", file):
-                return os.path.join(root, file)
-    raise FileNotFoundError("Shared library not found")
-
-
-def copy_file(src, dst):
-    with open(src, "rb") as f:
-        with open(dst, "wb") as g:
-            g.write(f.read())
-    print(f"Copy {src} to {dst}")
-
-
-if sys.platform == "darwin" or sys.platform == "win32":
-    extension = []
-    shared_lib_path = get_shared_lib_path()
-    print("###########################")
-    print(shared_lib_path)
-    print("###########################")
-    target_path = "./python/src/fastseqio/_fastseqio"
-    suffix = os.path.splitext(shared_lib_path)[1]
-    target_path += suffix
-    copy_file(shared_lib_path, target_path)
-    package_data = {"fastseqio": ["*.so", "*.pyd", "*.dylib"]}
-
-
-elif sys.platform == "linux":
+if sys.platform == "linux":
     extension = [
         setuptools.Extension(
             "_fastseqio",
             sources=["./seqio.c", "./python/fastseqio.cc"],
             include_dirs=[".", "python/pybind11/include"],
             extra_link_args=["-lz"],
+        )
+    ]
+    package_data = {}
+elif sys.platform == "win32":
+    extension = [
+        setuptools.Extension(
+            "_fastseqio",
+            sources=["./seqio.c", "./python/fastseqio.cc"],
+            include_dirs=[".", "python/pybind11/include", "./deps/zlib"],
+            extra_objects=["./zig-out/lib/z.lib"],
         )
     ]
     package_data = {}
