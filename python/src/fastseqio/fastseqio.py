@@ -111,6 +111,7 @@ class Record:
     def __len__(self):
         return self.__record.length()
 
+    @property
     def length(self) -> int:
         return self.__record.length()
 

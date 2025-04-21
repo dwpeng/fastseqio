@@ -86,14 +86,14 @@ def test_record():
     rev = record.reverse()
     assert rev == "TTTTTTTTGGGGGGGCA"
 
-    length = record.length()
+    length = record.length
     assert length == 17
 
     length = len(record)
     assert length == 17
 
     record.sequence += "xxx"
-    assert record.length() == 20
+    assert record.length == 20
     assert record.sequence == "ACGGGGGGGTTTTTTTTxxx"
     assert len(record) == 20
 
