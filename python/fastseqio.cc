@@ -220,7 +220,11 @@ public:
       this->openOptions.filename = filename.c_str();
       this->openOptions.mode = mode;
       this->openOptions.isGzipped = isGzipped;
-      this->openOptions.validChars = const_cast<char*>(validChars.c_str());
+      if (validChars.empty()) {
+        this->openOptions.validChars = nullptr;
+      } else {
+        this->openOptions.validChars = const_cast<char*>(validChars.c_str());
+      }
       this->file = seqioOpen(&openOptions);
     }
     if (filename.empty()) {

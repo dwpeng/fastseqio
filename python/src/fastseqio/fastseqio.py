@@ -472,9 +472,9 @@ class seqioFile:
         file = self._get_file()
         record = _seqioRecord(name, comment or "", sequence, quality or "")
         if quality is not None:
-            assert len(sequence) == len(
-                quality
-            ), "Sequence and quality lengths must match"
+            assert len(sequence) == len(quality), (
+                "Sequence and quality lengths must match"
+            )
             file.writeFastq(record)
         else:
             file.writeFasta(record)
