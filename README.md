@@ -18,7 +18,7 @@ WIP: I'm working on a python wrapper for this library.
 | :--- | :--- | :--- |
 | Linux | ✅ | ✅ |
 | MacOS | 🚧 | 🚧 |
-| Windows | 🚧 | 🚧 |
+| Windows | ✅ | ✅ |
 
 **Install**
 ```bash
