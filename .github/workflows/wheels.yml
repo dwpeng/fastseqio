@@ -90,3 +90,9 @@ jobs:
           CIBW_ARCHS: ${{ matrix.arch }}
           CIBW_MANYLINUX_*_IMAGE: ${{ matrix.manylinux-image }}
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.manylinux-image }}
+      - name: Upload wheels
+        continue-on-error: true
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_API_USER }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: twine upload wheelhouse/*.whl
