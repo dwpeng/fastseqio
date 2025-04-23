@@ -23,11 +23,11 @@ elif sys.platform == "win32":
     ]
     package_data = {}
 else:
-    raise ValueError("")
+    raise ValueError("Unsupported platform: " + sys.platform)
 
 setuptools.setup(
     name="fastseqio",
-    version="0.1.1",
+    version="0.1.2",
     author="dwpeng",
     author_email="1732889554@qq.com",
     license="MIT",

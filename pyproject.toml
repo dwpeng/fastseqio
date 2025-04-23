@@ -1,6 +1,6 @@
 [project]
 name = "fastseqio"
-version = "0.1.1"
+version = "0.1.2"
 description = "A package for reading and writing fasta/fastq files"
 readme = "README.md"
 requires-python = ">=3.8"

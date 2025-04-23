@@ -1,25 +1,12 @@
 import sys
 
-if sys.platform == "linux":
-    from _fastseqio import (
-        seqioFile as _seqioFile,
-        seqOpenMode as _seqOpenMode,
-        seqioRecord as _seqioRecord,
-    )
-elif sys.platform == "win32" or sys.platform == "darwin":
-    # from ._fastseqio import (
-    #     seqioFile as _seqioFile,
-    #     seqOpenMode as _seqOpenMode,
-    #     seqioRecord as _seqioRecord,
-    # )
-    print("Unsupported platform: ", sys.platform)
-    exit(1)
-else:
-    print("Unsupported platform: ", sys.platform)
-    exit(1)
+from _fastseqio import (
+    seqioFile as _seqioFile,
+    seqOpenMode as _seqOpenMode,
+    seqioRecord as _seqioRecord,
+)
 
 from typing import Optional, Literal
-
 
 __all__ = ["Record", "seqioFile", "seqioStdinFile", "seqioStdoutFile"]
 
