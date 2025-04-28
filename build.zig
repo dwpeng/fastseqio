@@ -43,6 +43,7 @@ pub fn build(b: *std.Build) void {
         .optimize = mode,
     });
     seqio.linkLibC();
+    seqio.addIncludePath(b.path("./deps/zlib"));
     seqio.addCSourceFiles(.{
         .root = b.path("./"),
         .files = &[_][]const u8{
