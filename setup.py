@@ -7,11 +7,10 @@ if sys.platform == "linux":
         setuptools.Extension(
             "_fastseqio",
             sources=["./seqio.c", "./python/fastseqio.cc"],
-            include_dirs=[".", "python/pybind11/include"],
-            extra_link_args=["-lz"],
+            include_dirs=[".", "python/pybind11/include", "./deps/zlib"],
+            extra_objects=["./zig-out/lib/libz.a"],
         )
     ]
-    package_data = {}
 elif sys.platform == "win32":
     extension = [
         setuptools.Extension(
@@ -21,7 +20,15 @@ elif sys.platform == "win32":
             extra_objects=["./zig-out/lib/z.lib"],
         )
     ]
-    package_data = {}
+elif sys.platform == "darwin":
+    extension = [
+        setuptools.Extension(
+            "_fastseqio",
+            sources=["./seqio.c", "./python/fastseqio.cc"],
+            include_dirs=[".", "python/pybind11/include", "./deps/zlib"],
+            extra_objects=["./zig-out/lib/libz.a"],
+        )
+    ]
 else:
     raise ValueError("Unsupported platform: " + sys.platform)
 
@@ -36,5 +43,4 @@ setuptools.setup(
     packages=setuptools.find_namespace_packages(where="./python/src"),
     package_dir={"": "./python/src"},
     ext_modules=extension,
-    package_data=package_data,  # type: ignore
 )

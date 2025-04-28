@@ -1,5 +1,3 @@
-import sys
-
 from _fastseqio import (
     seqioFile as _seqioFile,
     seqOpenMode as _seqOpenMode,
@@ -473,6 +471,41 @@ class seqioFile:
 
     def writeFasta(self, name: str, sequence: str, comment: Optional[str] = None):
         self.writeOne(name, sequence, comment=comment)
+
+    def writeRecord(self, record: Record, fastq: bool = False):
+        """
+        Write a sequence record to the file in FASTA or FASTQ format.
+        Parameters:
+        record (Record): The sequence record to write.
+        fastq (bool): If True, write the sequence in FASTQ format. Defaults to False.
+        Raises:
+        ValueError: If the file is not opened in write mode.
+        AssertionError: If the length of the sequence and quality scores do not match.
+        Examples:
+        >>> writer = seqioFile("/tmp/test.fa", "w")
+        >>> record = Record("seq1", "ATCG")
+        >>> writer.writeRecord(record)
+        >>> writer = seqioFile("/tmp/test.fq", "w")
+        >>> record = Record("seq1", "ATCG", "IIII")
+        >>> writer.writeRecord(record, fastq=True)
+        >>> record = Record("seq2", "GCTA", "IIII")
+        >>> writer.writeRecord(record, fastq=True)
+        >>> record = Record("seq3", "GCTA", "IIIII")
+        >>> writer.writeRecord(record, fastq=True)
+        Traceback (most recent call last):
+           ...
+        AssertionError: Sequence and quality lengths must match
+        """
+        if not self.writable:
+            raise ValueError("File not opened in write mode")
+        file = self._get_file()
+        if fastq:
+            assert len(record.sequence) == len(record.quality), (
+                "Sequence and quality lengths must match"
+            )
+            file.writeFastq(record._raw())
+        else:
+            file.writeFasta(record._raw())
 
     def __iter__(self):
         file = self._get_file()
