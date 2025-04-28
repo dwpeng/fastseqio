@@ -37,5 +37,23 @@ pub fn build(b: *std.Build) void {
         },
     });
 
-    b.installArtifact(zlib);
+    const seqio = b.addStaticLibrary(.{
+        .name = "seqio",
+        .target = target,
+        .optimize = mode,
+    });
+    seqio.linkLibC();
+    seqio.addCSourceFiles(.{
+        .root = b.path("./"),
+        .files = &[_][]const u8{
+            "seqio.c",
+        },
+        .flags = &[_][]const u8{
+            "-std=c99",
+            "-O3",
+        },
+    });
+
+    seqio.linkLibrary(zlib);
+    b.installArtifact(seqio);
 }

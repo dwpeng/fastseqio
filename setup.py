@@ -6,28 +6,29 @@ if sys.platform == "linux":
     extension = [
         setuptools.Extension(
             "_fastseqio",
-            sources=["./seqio.c", "./python/fastseqio.cc"],
+            sources=["./python/fastseqio.cc"],
             include_dirs=[".", "python/pybind11/include", "./deps/zlib"],
-            extra_objects=["./zig-out/lib/libz.a"],
+            extra_objects=["./zig-out/lib/libseqio.a"],
+            extra_compile_args=["-std=c++11"],
         )
     ]
 elif sys.platform == "win32":
     extension = [
         setuptools.Extension(
             "_fastseqio",
-            sources=["./seqio.c", "./python/fastseqio.cc"],
+            sources=["./python/fastseqio.cc"],
             include_dirs=[".", "python/pybind11/include", "./deps/zlib"],
-            extra_objects=["./zig-out/lib/z.lib"],
+            extra_objects=["./zig-out/lib/seqio.lib"],
         )
     ]
 elif sys.platform == "darwin":
     extension = [
         setuptools.Extension(
             "_fastseqio",
-            sources=["./seqio.c", "./python/fastseqio.cc"],
+            sources=["./python/fastseqio.cc"],
             include_dirs=[".", "python/pybind11/include", "./deps/zlib"],
-            extra_objects=["./zig-out/lib/libz.a"],
-            extra_compile_args=["-Wc++11-extensions"],
+            extra_objects=["./zig-out/lib/libseqio.a"],
+            extra_compile_args=["-std=c++11"],
         )
     ]
 else:

@@ -15,6 +15,3 @@ $(ROOT_DIR)/test-seqio-stdin: test-seqio-stdin.c $(seqioObj)
 
 $(ROOT_DIR)/test-seqio-cpp-stdin: test-seqio-cpp-stdin.cc $(seqioObj)
 	$(cc) $(CFLAGS) -o $@ $^ $(LIBS)
-
-$(ROOT_DIR)/test-cigar: test-cigar.c $(cigarObj)
-	$(cc) $(CFLAGS) -o $@ $^ $(LIBS)
