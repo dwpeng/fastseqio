@@ -109,6 +109,8 @@ jobs:
     strategy:
       matrix:
         python-version: [38, 39, 310, 311, 312, 313]
+        os: [macos-13, macos-14]
+        arch: [x86_64, arm64]
         include:
           - os: macos-13
             arch: x86_64
