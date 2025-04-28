@@ -27,6 +27,7 @@ elif sys.platform == "darwin":
             sources=["./seqio.c", "./python/fastseqio.cc"],
             include_dirs=[".", "python/pybind11/include", "./deps/zlib"],
             extra_objects=["./zig-out/lib/libz.a"],
+            extra_compile_args=["-Wc++11-extensions"],
         )
     ]
 else:
