@@ -17,7 +17,7 @@ WIP: I'm working on a python wrapper for this library.
 | os | reading | writing |
 | :--- | :--- | :--- |
 | Linux | ✅ | ✅ |
-| MacOS | 🚧 | 🚧 |
+| MacOS | ✅ | ✅ |
 | Windows | ✅ | ✅ |
 
 **Install**
