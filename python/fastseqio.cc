@@ -9,7 +9,6 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
-#include <optional>
 #include <string>
 
 namespace py = pybind11;

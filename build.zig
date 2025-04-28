@@ -2,17 +2,18 @@ const std = @import("std");
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
-    const mode = b.standardOptimizeOption(.{});
 
-    const zlib = b.addStaticLibrary(.{
-        .name = "z",
+    const mode = b.standardOptimizeOption(.{});
+    const seqio = b.addStaticLibrary(.{
+        .name = "seqio",
         .target = target,
         .optimize = mode,
     });
 
-    zlib.linkLibC();
-    zlib.addIncludePath(b.path("./deps/zlib"));
-    zlib.addCSourceFiles(.{
+    seqio.linkLibC();
+    seqio.addIncludePath(b.path("./deps/zlib"));
+
+    seqio.addCSourceFiles(.{
         .root = b.path("./deps/zlib"),
         .files = &[_][]const u8{
             "adler32.c",
@@ -37,13 +38,6 @@ pub fn build(b: *std.Build) void {
         },
     });
 
-    const seqio = b.addStaticLibrary(.{
-        .name = "seqio",
-        .target = target,
-        .optimize = mode,
-    });
-    seqio.linkLibC();
-    seqio.addIncludePath(b.path("./deps/zlib"));
     seqio.addCSourceFiles(.{
         .root = b.path("./"),
         .files = &[_][]const u8{
@@ -55,6 +49,5 @@ pub fn build(b: *std.Build) void {
         },
     });
 
-    seqio.linkLibrary(zlib);
     b.installArtifact(seqio);
 }
