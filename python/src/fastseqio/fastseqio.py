@@ -152,7 +152,7 @@ class Record:
             return self.sequence
         return self.__record.lower()
 
-    def hpc_commpress(self) -> str:
+    def hpc(self) -> str:
         """
         Compress the sequence using homopolymer compression (HPC).
 
@@ -163,10 +163,10 @@ class Record:
 
         Examples:
           >>> record = Record("name", "AAATTTCCCGGG")
-          >>> record.hpc_commpress()
+          >>> record.hpc()
           'ATCG'
           >>> record = Record("name", "AAGGTTCC")
-          >>> record.hpc_commpress()
+          >>> record.hpc()
           'AGTC'
         """
         return self.__record.hpc()

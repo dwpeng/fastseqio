@@ -111,7 +111,7 @@ def test_record():
     assert record.name == "test2"
     assert record.sequence == "ACGGGGGGGTTTTTTTT"
 
-    hpc = record.hpc_commpress()
+    hpc = record.hpc()
     assert hpc == "ACGT"
 
     rev = record.reverse()
