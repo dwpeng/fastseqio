@@ -8,13 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define enable_gzip
-
-#ifdef enable_gzip
 #include <zconf.h>
 #include <zlib.h>
-#endif
 
 #define seqioDefaultLineWidth 0
 #define seqioDefaultincludeComment true

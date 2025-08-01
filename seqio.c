@@ -22,27 +22,21 @@ static char* openModeStr[] = {
   [seqOpenModeWrite] = "w",
 };
 
-#ifdef enable_gzip
 static char* openModeStrGzip[] = {
   [seqOpenModeRead] = "rb",
   [seqOpenModeWrite] = "wb",
 };
-#endif
 
 static seqioWriteOptions defaultWriteOptions = defaultSeqioWriteOptions;
 
 static inline char*
 getOpenModeStr(seqioOpenOptions* options)
 {
-#ifdef enable_gzip
   if (options->isGzipped) {
     return openModeStrGzip[options->mode];
   } else {
     return openModeStr[options->mode];
   }
-#else
-  return openModeStr[options->mode];
-#endif
 }
 
 static inline void
@@ -98,15 +92,11 @@ readDataToBuffer(seqioFile* sf)
   }
   size_t readSize = 0;
   size_t needReadSize = sf->buffer.capacity - sf->buffer.left;
-#ifdef enable_gzip
   if (sf->pravite.options->isGzipped) {
     readSize = gzread(sf->pravite.file, sf->buffer.data, needReadSize);
   } else {
     readSize = fread(sf->buffer.data, 1, needReadSize, sf->pravite.file);
   }
-#else
-  readSize = fread(sf->buffer.data, 1, needReadSize, sf->file);
-#endif
   if (readSize < needReadSize) {
     sf->pravite.isEOF = true;
   }
@@ -120,7 +110,6 @@ freshDataToFile(seqioFile* sf)
 {
   if (sf->pravite.mode == seqOpenModeRead)
     return;
-#ifdef enable_gzip
   if (sf->pravite.options->isGzipped) {
     gzwrite(sf->pravite.file, sf->buffer.data + sf->buffer.offset,
             sf->buffer.left);
@@ -130,9 +119,6 @@ freshDataToFile(seqioFile* sf)
            sf->pravite.file);
     fflush(sf->pravite.file);
   }
-#else
-  fwrite(sf->buffer.data + sf->buffer.offset, 1, sf->buffer.left, sf->file);
-#endif
   sf->buffer.offset = 0;
   sf->buffer.left = 0;
 }
@@ -257,15 +243,11 @@ typedef enum {
 static inline void
 resetFilePointer(seqioFile* sf)
 {
-#ifdef enable_gzip
   if (sf->pravite.options->isGzipped) {
     gzseek(sf->pravite.file, 0, SEEK_SET);
   } else {
     fseek(sf->pravite.file, 0, SEEK_SET);
   }
-#else
-  fseek(sf->file, 0, SEEK_SET);
-#endif
   sf->pravite.isEOF = false;
   sf->pravite.state = READ_STATUS_NONE;
   sf->buffer.left = 0;
@@ -389,7 +371,6 @@ seqioOpen(seqioOpenOptions* options)
       return handleStdin(sf);
     }
   }
-#ifdef enable_gzip
   if (checkFileType && options->mode == seqOpenModeRead) {
     FILE* fp = fopen(options->filename, "rb");
     if (fp == NULL) {
@@ -416,14 +397,6 @@ seqioOpen(seqioOpenOptions* options)
       sf->pravite.file = fopen(options->filename, getOpenModeStr(options));
     }
   }
-#else
-  sf->file = fopen(options->filename, getOpenModeStr(options));
-  if (sf->file == NULL) {
-    fclose(sf->file);
-    seqioFree(sf);
-    return NULL;
-  }
-#endif
   size_t buff_size = seqioDefaultBufferSize;
   if (options->mode == seqOpenModeWrite) {
     buff_size = seqioDefaultWriteBufferSize;
@@ -457,7 +430,6 @@ seqioClose(seqioFile* sf)
     return;
   }
   if (sf->pravite.file != NULL) {
-#ifdef enable_gzip
     if (sf->pravite.mode == seqOpenModeWrite) {
       freshDataToFile(sf);
     }
@@ -472,9 +444,6 @@ seqioClose(seqioFile* sf)
       }
       fclose(sf->pravite.file);
     }
-#else
-    fclose(sf->file);
-#endif
   }
   if (sf->buffer.data != NULL) {
     seqioFree(sf->buffer.data);
