@@ -1,19 +1,19 @@
 #ifndef __seqio_h__
 #define __seqio_h__
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #define enable_gzip
 
 #ifdef enable_gzip
-#include <zlib.h>
 #include <zconf.h>
+#include <zlib.h>
 #endif
 
 #define seqioDefaultLineWidth 0
@@ -21,10 +21,11 @@
 #define seqioDefaultBufferSize 1024l * 16l
 #define seqioDefaultWriteBufferSize 1024l * 128l
 
-
+#ifndef seqioAlloc
 #define seqioMalloc(size) malloc(size)
 #define seqioRealloc(ptr, size) realloc(ptr, size)
 #define seqioFree(ptr) free(ptr)
+#endif
 
 #ifdef __cplusplus
 extern "C" {
