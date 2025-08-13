@@ -240,6 +240,24 @@ public:
   ~seqioFileImpl() { this->close(); }
 
   void
+  set_write_line_width(size_t lineWidth)
+  {
+    this->writeOptions.lineWidth = lineWidth;
+  }
+
+  void
+  set_write_include_comment(bool includeComment)
+  {
+    this->writeOptions.includeComment = includeComment;
+  }
+
+  void
+  set_write_base_case(baseCase baseCase)
+  {
+    this->writeOptions.baseCase = baseCase;
+  }
+
+  void
   close()
   {
     if (this->file) {
@@ -337,6 +355,12 @@ PYBIND11_MODULE(_fastseqio, m)
       .value("WRITE", seqOpenMode::seqOpenModeWrite)
       .export_values();
 
+  py::enum_<baseCase>(m, "seqioBaseCase")
+      .value("ORIGINAL", baseCase::seqioBaseCaseOriginal)
+      .value("UPPER", baseCase::seqioBaseCaseUpper)
+      .value("LOWER", baseCase::seqioBaseCaseLower)
+      .export_values();
+
   py::class_<seqioRecordImpl, std::shared_ptr<seqioRecordImpl> >(m,
                                                                  "seqioRecord")
       .def(py::init([](std::string name, std::string comment,
@@ -368,5 +392,9 @@ PYBIND11_MODULE(_fastseqio, m)
       .def("writeFastq", &seqioFileImpl::writeFastq)
       .def("close", &seqioFileImpl::close)
       .def("fflush", &seqioFileImpl::fflush)
-      .def("reset", &seqioFileImpl::reset);
+      .def("reset", &seqioFileImpl::reset)
+      .def("set_write_line_width", &seqioFileImpl::set_write_line_width)
+      .def("set_write_include_comment",
+           &seqioFileImpl::set_write_include_comment)
+      .def("set_write_base_case", &seqioFileImpl::set_write_base_case);
 }

@@ -2,6 +2,7 @@ from _fastseqio import (
     seqioFile as _seqioFile,
     seqOpenMode as _seqOpenMode,
     seqioRecord as _seqioRecord,
+    seqioBaseCase as _seqioBaseCase,
 )
 
 from typing import Optional, Literal
@@ -12,6 +13,12 @@ __all__ = ["Record", "seqioFile", "seqioStdinFile", "seqioStdoutFile"]
 class seqioOpenMode:
     READ = _seqOpenMode.READ
     WRITE = _seqOpenMode.WRITE
+
+
+class seqioBaseCase:
+    ORIGINAL = _seqioBaseCase.ORIGINAL
+    UPPER = _seqioBaseCase.UPPER
+    LOWER = _seqioBaseCase.LOWER
 
 
 class RecordKmerIterator:
@@ -323,6 +330,32 @@ class seqioFile:
         if path.lower().endswith(".gz"):
             compressed = True
         self.__file = _seqioFile(path, self.__mode, compressed, valid_chars)
+
+    def set_write_options(
+        self,
+        /,
+        *,
+        lineWidth: Optional[int] = None,
+        includeComments: Optional[bool] = None,
+        baseCase: Optional[Literal["upper", "lower"]] = None,
+    ):
+        if self.__mode != seqioOpenMode.WRITE:
+            raise ValueError("File not opened in write mode")
+        fp = self._get_file()
+        assert fp is not None, "File not opened"
+        if lineWidth is not None:
+            assert type(lineWidth) is int, "Line width must be an integer"
+            assert lineWidth > 0, "Line width must be greater than 0"
+            fp.set_write_line_width(lineWidth)
+        if includeComments is not None:
+            assert type(includeComments) is bool, "includeComments must be a boolean"
+            fp.set_write_include_comment(includeComments)
+        if baseCase is not None:
+            assert baseCase in ["upper", "lower"], "baseCase must be 'upper' or 'lower'"
+            if baseCase == "upper":
+                fp.set_write_base_case(seqioBaseCase.UPPER)
+            else:
+                fp.set_write_base_case(seqioBaseCase.LOWER)
 
     @property
     def readable(self):
