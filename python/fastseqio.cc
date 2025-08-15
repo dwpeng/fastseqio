@@ -205,10 +205,7 @@ public:
   seqOpenMode mode;
   bool isGzipped;
 
-  seqioFileImpl(std::string filename,
-                seqOpenMode mode,
-                bool isGzipped,
-                std::string validChars)
+  seqioFileImpl(std::string filename, seqOpenMode mode, bool isGzipped)
   {
     if (!filename.empty()) {
       this->filename = filename;
@@ -219,11 +216,6 @@ public:
       this->openOptions.filename = filename.c_str();
       this->openOptions.mode = mode;
       this->openOptions.isGzipped = isGzipped;
-      if (validChars.empty()) {
-        this->openOptions.validChars = nullptr;
-      } else {
-        this->openOptions.validChars = const_cast<char*>(validChars.c_str());
-      }
       this->file = seqioOpen(&openOptions);
     }
     if (filename.empty()) {
@@ -384,7 +376,7 @@ PYBIND11_MODULE(_fastseqio, m)
       .def("hpc", &seqioRecordImpl::hpc);
 
   py::class_<seqioFileImpl, std::shared_ptr<seqioFileImpl> >(m, "seqioFile")
-      .def(py::init<std::string, seqOpenMode, bool, std::string>())
+      .def(py::init<std::string, seqOpenMode, bool>())
       .def("readOne", &seqioFileImpl::readOne)
       .def("readFasta", &seqioFileImpl::readFasta)
       .def("readFastq", &seqioFileImpl::readFastq)

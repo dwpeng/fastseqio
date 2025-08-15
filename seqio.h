@@ -56,7 +56,6 @@ typedef struct {
   bool isGzipped;
   seqOpenMode mode;
   bool freeRecordOnEOF;
-  char* validChars;
 } seqioOpenOptions;
 
 typedef enum {

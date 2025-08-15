@@ -7,14 +7,12 @@ seqioOpenOptions __defaultStdinOptions = {
   .filename = NULL,
   .isGzipped = false,
   .mode = seqOpenModeRead,
-  .validChars = NULL,
 };
 
 seqioOpenOptions __defaultStdoutOptions = {
   .filename = NULL,
   .isGzipped = false,
   .mode = seqOpenModeWrite,
-  .validChars = NULL,
 };
 
 static char* openModeStr[] = {
@@ -91,7 +89,7 @@ readDataToBuffer(seqioFile* sf)
     return 0;
   }
   size_t readSize = 0;
-  size_t needReadSize = sf->buffer.capacity - sf->buffer.left;
+  size_t needReadSize = sf->buffer.capacity;
   if (sf->pravite.options->isGzipped) {
     readSize = gzread(sf->pravite.file, sf->buffer.data, needReadSize);
   } else {
@@ -323,26 +321,6 @@ handleStdin(seqioFile* sf)
   return sf;
 }
 
-static inline char*
-seqioValidChars(char* _validChars)
-{
-  char* validChars = (char*)seqioMalloc(256);
-  memset(validChars, 0, 256);
-  if (_validChars) {
-    for (size_t i = 0; i < strlen(_validChars); i++) {
-      validChars[(int)_validChars[i]] = 1;
-    }
-  } else {
-    for (int i = 'a'; i < 'z'; i++) {
-      validChars[i] = 1;
-    }
-    for (int i = 'A'; i < 'Z'; i++) {
-      validChars[i] = 1;
-    }
-  }
-  return validChars;
-}
-
 seqioFile*
 seqioOpen(seqioOpenOptions* options)
 {
@@ -360,7 +338,6 @@ seqioOpen(seqioOpenOptions* options)
     return NULL;
   }
   sf->pravite.options = options;
-  sf->validChars = seqioValidChars(options->validChars);
   if (!options->filename) {
     if (options->mode == seqOpenModeWrite) {
       sf->pravite.toStdout = true;
@@ -591,19 +568,6 @@ readUntil(seqioFile* sf, seqioString* s, char untilChar, readStatus nextStatus)
   }
 }
 
-static inline void
-seqioOnlySaveValidChars(seqioFile* sf, seqioString* s)
-{
-  size_t offset = 0;
-  for (size_t i = 0; i < s->length; i++) {
-    if (sf->validChars[(int)(s->data[i])]) {
-      s->data[offset++] = s->data[i];
-    }
-  }
-  s->data[offset] = '\0';
-  s->length = offset;
-}
-
 seqioRecord*
 seqioReadFasta(seqioFile* sf, seqioRecord* record)
 {
@@ -678,7 +642,6 @@ seqioReadFasta(seqioFile* sf, seqioRecord* record)
         backwardBufferOne(sf);
         readUntil(sf, record->sequence, '>', READ_STATUS_NAME);
         record->sequence->data[record->sequence->length] = '\0';
-        seqioOnlySaveValidChars(sf, record->sequence);
         sf->record = (seqioRecord*)record;
         return record;
       }
@@ -688,7 +651,6 @@ seqioReadFasta(seqioFile* sf, seqioRecord* record)
       }
     }
   }
-  seqioOnlySaveValidChars(sf, record->sequence);
   sf->record = (seqioRecord*)record;
   record->sequence->data[record->sequence->length] = '\0';
   return record;
@@ -786,7 +748,6 @@ seqioReadFastq(seqioFile* sf, seqioRecord* record)
         backwardBufferOne(sf);
         readUntil(sf, record->quality, '@', READ_STATUS_NAME);
         record->quality->data[record->quality->length] = '\0';
-        seqioOnlySaveValidChars(sf, record->sequence);
         sf->record = (seqioRecord*)record;
         return record;
       }
@@ -796,7 +757,6 @@ seqioReadFastq(seqioFile* sf, seqioRecord* record)
       }
     }
   }
-  seqioOnlySaveValidChars(sf, record->sequence);
   sf->record = (seqioRecord*)record;
   record->quality->data[record->quality->length] = '\0';
   return record;

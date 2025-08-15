@@ -292,7 +292,6 @@ class seqioFile:
         path: str,
         mode: Literal["w", "r"] = "r",
         compressed: bool = False,
-        valid_chars: Optional[str] = None,
     ):
         """
         Open a fasta/fastq file for reading or writing.
@@ -301,7 +300,6 @@ class seqioFile:
             path (str): The path to the file. Use "-" for stdin/stdout.
             mode (str): The mode to open the file in. Must be 'r' for reading or 'w' for writing. Defaults to 'r'.
             compressed (bool): If True, the file is compressed. Defaults to False.
-            valid_chars (Optional[str]): A string of valid characters for the sequence. Defaults to None.
 
         Raises:
             ValueError: If the mode is not 'r' or 'w'.
@@ -320,16 +318,12 @@ class seqioFile:
             self.__mode = seqioOpenMode.WRITE
         else:
             self.__mode = seqioOpenMode.READ
-        if valid_chars is None:
-            valid_chars = ""
-        else:
-            assert type(valid_chars) is str, "valid_chars must be a string"
         if path == "-":
-            self.__file = _seqioFile("", self.__mode, compressed, valid_chars)
+            self.__file = _seqioFile("", self.__mode, compressed)
             return
         if path.lower().endswith(".gz"):
             compressed = True
-        self.__file = _seqioFile(path, self.__mode, compressed, valid_chars)
+        self.__file = _seqioFile(path, self.__mode, compressed)
 
     def set_write_options(
         self,

@@ -1,9 +1,11 @@
 ## seqio
+
 A c library for reading and writing sequences in fasta and fastq format.
 
 > Inspired by [kseq.h](https://github.com/attractivechaos/klib/blob/master/kseq.h), another library for reading fasta and fastq files.
 
 ## features
+
 * Read and write fasta and fastq files
 * Support for gzipped files
 * Intuitive API
@@ -21,6 +23,7 @@ WIP: I'm working on a python wrapper for this library.
 | Windows | ✅ | ✅ |
 
 **Install**
+
 ```bash
 pip install fastseqio
 ```
@@ -142,6 +145,7 @@ def test_kmers():
     assert kmers == ["ACGG", "CGGG", "GGGG"]
 
 ```
+
 </details>
 
 ### C
@@ -162,9 +166,6 @@ main(int argc, char* argv[])
   seqioOpenOptions openOptions = {
     .filename = argv[1],
     .mode = seqOpenModeRead,
-    // optional, valid characters in sequence
-    // default: "A-Za-z"
-    .validChars = "ACGTNagctn",
   };
   // Step2: open file
   seqioFile* sf = seqioOpen(&openOptions);
@@ -182,9 +183,6 @@ main(int argc, char* argv[])
 }
 ```
 
-
-
-
 ```bash
 gcc -o main main.c seqio.c -lz
 ./main test.fasta
@@ -193,6 +191,7 @@ gcc -o main main.c seqio.c -lz
 ## API & Structure
 
 ### seqioOpenOptions
+
 ```c
 typedef enum {
   seqOpenModeRead,
@@ -207,6 +206,7 @@ typedef struct {
 ```
 
 ### open File
+
 ```c
 
 /**
@@ -236,6 +236,7 @@ void seqioClose(seqioFile* file);
 ```
 
 ### record
+
 ```c
 typedef enum {
   seqioRecordTypeFasta,
@@ -257,13 +258,16 @@ typedef struct {
   seqioString* quality;
 } seqioRecord;
 ```
+
 while reading a record, the memory of the record will be allocated automatically, and it will be used repeatedly. So you don't need to free the memory of the record. At the end of the file, the memory of the record will be freed automatically.
 
 A record will be freed when the following conditions are met:
+
 * All records are read by `seqioRead` or `seqioReadFasta` or `seqioReadFastq`
 * The file is closed by `seqioClose`
 
 ### read record
+
 ```c
 /**
   * @brief read a record
@@ -317,10 +321,11 @@ void seqioWriteFastq(seqioFile* file, seqioRecord* record, seqioWriteOptions* op
 ```
 
 ## example
+
 more examples can be found in the test/benchmark folder.
 
-
 ## memory check
+
 ```bash
 valgrind --leak-check=full --leak-check=full --show-leak-kinds=all --log-file=./1.log --track-origins=yes ./main
 ```
@@ -344,6 +349,7 @@ valgrind --leak-check=full --leak-check=full --show-leak-kinds=all --log-file=./
 ```
 
 ## benchmark
+
 For this benchmark, I re-used sequence files from SeqKit benchmark:
 [seqkit-benchmark-data.tar.gz](http://app.shenwei.me/data/seqkit/seqkit-benchmark-data.tar.gz)
 
@@ -358,6 +364,7 @@ python benchmark.py
 ```
 
 ### Machine info
+
 ```txt
 GCC: gcc version 12.2.0 (Debian 12.2.0-14)
 OS: Linux 5.15.133.1-microsoft-standard-WSL2 #1 SMP Thu Oct 5 21:02:42 UTC 2023 x86_64 GNU/Linux
