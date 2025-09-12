@@ -14,4 +14,4 @@ $(ROOT_DIR)/test-seqio-stdin: test-seqio-stdin.c $(seqioObj)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 $(ROOT_DIR)/test-seqio-cpp-stdin: test-seqio-cpp-stdin.cc $(seqioObj)
-	$(CXX) $(CFLAGS) -o $@ $^ $(LIBS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)

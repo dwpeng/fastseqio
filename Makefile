@@ -4,6 +4,7 @@ export LIBS := -lz -lm -march=native
 export ROOT_DIR := $(shell pwd)
 export INCLUDE := $(ROOT_DIR)
 export CFLAGS := -Wall -Wextra -Werror -O3 -g -I$(INCLUDE)
+export CXXFLAGS := -Wall -Wextra -Werror -O3 -g -I$(INCLUDE)
 export seqioSource := $(ROOT_DIR)/seqio.c 
 export seqioObj := $(seqioSource:.c=.o)
 export cigarSource := $(ROOT_DIR)/cigar.c
