@@ -76,22 +76,22 @@ public:
   }
   ~seqioRecordImpl() {}
   std::string
-  get_name()
+  get_name() const
   {
     return name;
   }
   std::string
-  get_sequence()
+  get_sequence() const
   {
     return sequence;
   }
   std::string
-  get_quality()
+  get_quality() const
   {
     return quality;
   }
   std::string
-  get_comment()
+  get_comment() const
   {
     return comment;
   }
@@ -198,6 +198,24 @@ private:
   std::string sequence;
   std::string quality;
 };
+
+py::tuple
+seqioRecordPickleSerialize(const seqioRecordImpl& record)
+{
+  py::tuple tuple = py::make_tuple(
+      py::bytes(record.get_name()), py::bytes(record.get_comment()),
+      py::bytes(record.get_sequence()), py::bytes(record.get_quality()));
+  return tuple;
+}
+
+seqioRecordImpl
+seqioRecordPickleDeserialize(const py::tuple& tuple)
+{
+  auto record = seqioRecordImpl(
+      py::cast<std::string>(tuple[0]), py::cast<std::string>(tuple[1]),
+      py::cast<std::string>(tuple[2]), py::cast<std::string>(tuple[3]));
+  return record;
+}
 
 class seqioFileImpl {
 public:
@@ -373,7 +391,14 @@ PYBIND11_MODULE(_fastseqio, m)
       .def("length", &seqioRecordImpl::length)
       .def("reverse", &seqioRecordImpl::reverse)
       .def("subseq", &seqioRecordImpl::subseq)
-      .def("hpc", &seqioRecordImpl::hpc);
+      .def("hpc", &seqioRecordImpl::hpc)
+      .def(py::pickle(
+          [](const seqioRecordImpl& record) {
+            return seqioRecordPickleSerialize(record);
+          },
+          [](const py::tuple& tuple) {
+            return seqioRecordPickleDeserialize(tuple);
+          }));
 
   py::class_<seqioFileImpl, std::shared_ptr<seqioFileImpl> >(m, "seqioFile")
       .def(py::init<std::string, seqOpenMode, bool>())

@@ -109,3 +109,16 @@ def test_kmers():
     kmers = list(record.kmers(4))
     assert len(kmers) == (len(record) - 4 + 1)
     assert kmers == ["ACGG", "CGGG", "GGGG"]
+
+
+def test_pickle():
+    import pickle
+
+    record = Record("test", "ACGGGG")
+
+    obj = pickle.dumps(record)
+
+    record = pickle.loads(obj)
+
+    assert record.name == "test"
+    assert record.sequence == "ACGGGG"
