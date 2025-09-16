@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <zlib.h>
 
 seqioOpenOptions __defaultStdinOptions = {
   .filename = NULL,
@@ -321,6 +322,41 @@ handleStdin(seqioFile* sf)
   return sf;
 }
 
+static inline void
+seqioStats(seqioFile* sf)
+{
+  if (sf->pravite.mode == seqOpenModeRead && sf->fromFile) {
+    if (sf->pravite.options->isGzipped) {
+      gzseek((gzFile)sf->pravite.file, 0, SEEK_END);
+      sf->fileStats.fileSize = gztell((gzFile)sf->pravite.file);
+      gzseek((gzFile)sf->pravite.file, 0, SEEK_SET);
+    } else {
+      fseek((FILE*)sf->pravite.file, 0, SEEK_END);
+      sf->fileStats.fileSize = ftell((FILE*)sf->pravite.file);
+      fseek((FILE*)sf->pravite.file, 0, SEEK_SET);
+    }
+    sf->fileStats.fileOffset = 0;
+  }
+}
+
+static inline void
+seqioTell(seqioFile* sf)
+{
+  if (sf->pravite.mode == seqOpenModeRead && sf->fromFile) {
+    if (sf->pravite.options->isGzipped) {
+      sf->fileStats.fileOffset = gztell((gzFile)sf->pravite.file);
+    } else {
+      sf->fileStats.fileOffset = ftell((FILE*)sf->pravite.file);
+    }
+    if (sf->fileStats.fileOffset == sf->fileStats.fileSize) {
+      if (sf->buffer.left && !sf->pravite.options->isGzipped) {
+        // only plain file can compute the offset
+        sf->fileStats.fileOffset -= sf->buffer.left;
+      }
+    }
+  }
+}
+
 seqioFile*
 seqioOpen(seqioOpenOptions* options)
 {
@@ -338,11 +374,13 @@ seqioOpen(seqioOpenOptions* options)
     return NULL;
   }
   sf->pravite.options = options;
+  sf->fromFile = true;
   if (!options->filename) {
     if (options->mode == seqOpenModeWrite) {
       sf->pravite.toStdout = true;
       sf->pravite.file = stdout;
     } else {
+      sf->fromFile = false;
       sf->pravite.fromStdin = true;
       sf->pravite.file = stdin;
       return handleStdin(sf);
@@ -392,6 +430,7 @@ seqioOpen(seqioOpenOptions* options)
   sf->pravite.mode = options->mode;
   sf->record = NULL;
   sf->pravite.isEOF = false;
+  seqioStats(sf);
   if (options->mode == seqOpenModeRead) {
     seqioGuessType(sf);
   }
@@ -428,7 +467,6 @@ seqioClose(seqioFile* sf)
   if (sf->record != NULL && sf->pravite.options->freeRecordOnEOF) {
     seqioFreeRecord(sf->record);
   }
-  seqioFree(sf->validChars);
   seqioFree(sf);
 }
 
@@ -454,6 +492,7 @@ seqioReset(seqioFile* sf)
   }
   sf->pravite.state = READ_STATUS_NONE;
   sf->pravite.isEOF = false;
+  sf->fileStats.fileOffset = 0;
 }
 
 seqioRecordType
@@ -576,6 +615,7 @@ seqioReadFasta(seqioFile* sf, seqioRecord* record)
       seqioFreeRecord(record);
     }
     sf->record = NULL;
+    sf->fileStats.fileOffset = sf->fileStats.fileSize;
     return NULL;
   }
   ensureFastaRecord(sf, "Cannot read fasta record from a fastq file.");
@@ -643,6 +683,7 @@ seqioReadFasta(seqioFile* sf, seqioRecord* record)
         readUntil(sf, record->sequence, '>', READ_STATUS_NAME);
         record->sequence->data[record->sequence->length] = '\0';
         sf->record = (seqioRecord*)record;
+        seqioTell(sf);
         return record;
       }
       default: {
@@ -653,6 +694,7 @@ seqioReadFasta(seqioFile* sf, seqioRecord* record)
   }
   sf->record = (seqioRecord*)record;
   record->sequence->data[record->sequence->length] = '\0';
+  seqioTell(sf);
   return record;
 }
 
@@ -664,6 +706,7 @@ seqioReadFastq(seqioFile* sf, seqioRecord* record)
       seqioFreeRecord(record);
     }
     sf->record = NULL;
+    sf->fileStats.fileOffset = sf->fileStats.fileSize;
     return NULL;
   }
   ensureFastqRecord(sf, "Cannot read fastq record from a fasta file.");
@@ -749,6 +792,7 @@ seqioReadFastq(seqioFile* sf, seqioRecord* record)
         readUntil(sf, record->quality, '@', READ_STATUS_NAME);
         record->quality->data[record->quality->length] = '\0';
         sf->record = (seqioRecord*)record;
+        seqioTell(sf);
         return record;
       }
       default: {
@@ -759,6 +803,7 @@ seqioReadFastq(seqioFile* sf, seqioRecord* record)
   }
   sf->record = (seqioRecord*)record;
   record->quality->data[record->quality->length] = '\0';
+  seqioTell(sf);
   return record;
 }
 

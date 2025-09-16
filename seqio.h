@@ -89,7 +89,11 @@ typedef struct {
     void* file;
     seqOpenMode mode;
   } pravite;
-  char* validChars;
+  struct {
+    size_t fileSize;
+    size_t fileOffset;
+  } fileStats;
+  bool fromFile;
 } seqioFile;
 
 #define defaultSeqioWriteOptions                                              \

@@ -534,6 +534,16 @@ class seqioFile:
         else:
             file.writeFasta(record._raw())
 
+    @property
+    def size(self) -> int:
+        file = self._get_file()
+        return file.fileSize()
+
+    @property
+    def offset(self) -> int:
+        file = self._get_file()
+        return file.fileOffset()
+
     def __iter__(self):
         file = self._get_file()
         while True:

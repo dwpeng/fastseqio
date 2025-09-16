@@ -9,6 +9,7 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
+#include <stdio.h>
 #include <string>
 
 namespace py = pybind11;
@@ -351,6 +352,18 @@ public:
     delete _record;
   }
 
+  size_t
+  fileSize()
+  {
+    return this->file->fileStats.fileSize;
+  }
+
+  size_t
+  fileOffset()
+  {
+    return this->file->fileStats.fileOffset;
+  }
+
 private:
   seqioFile* file;
   seqioOpenOptions openOptions;
@@ -413,5 +426,7 @@ PYBIND11_MODULE(_fastseqio, m)
       .def("set_write_line_width", &seqioFileImpl::set_write_line_width)
       .def("set_write_include_comment",
            &seqioFileImpl::set_write_include_comment)
-      .def("set_write_base_case", &seqioFileImpl::set_write_base_case);
+      .def("set_write_base_case", &seqioFileImpl::set_write_base_case)
+      .def("fileSize", &seqioFileImpl::fileSize)
+      .def("fileOffset", &seqioFileImpl::fileOffset);
 }

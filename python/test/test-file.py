@@ -122,3 +122,21 @@ def test_pickle():
 
     assert record.name == "test"
     assert record.sequence == "ACGGGG"
+
+
+def test_seqiofile_size_offset():
+    file = seqioFile("test-data/test2.fa")
+    fp = open("test-data/test2.fa", "r")
+    filesize = os.path.getsize("test-data/test2.fa")
+    records = []
+    for record in file:
+        records.append(record)
+        print(file.offset)
+
+    print(records)
+
+    assert file.size == filesize
+
+    fp.read()
+
+    assert file.offset == fp.tell()
