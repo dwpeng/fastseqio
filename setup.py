@@ -36,7 +36,7 @@ else:
 
 setuptools.setup(
     name="fastseqio",
-    version="0.1.7",
+    version="0.1.8",
     author="dwpeng",
     author_email="1732889554@qq.com",
     license="MIT",
