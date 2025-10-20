@@ -7,7 +7,7 @@ from _fastseqio import (
 
 from typing import Optional, Literal
 
-__all__ = ["Record", "seqioFile", "seqioStdinFile", "seqioStdoutFile"]
+__all__ = ["Record", "seqioFile"]
 
 
 class seqioOpenMode:
@@ -573,18 +573,3 @@ class seqioFile:
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
-
-
-class seqioStdinFile(seqioFile):
-    def __init__(self):
-        self.__file = _seqioFile("", seqioOpenMode.READ, False, None)
-        self.__mode = seqioOpenMode.READ
-
-    def reset(self):
-        raise NotImplementedError("Cannot reset stdin")
-
-
-class seqioStdoutFile(seqioFile):
-    def __init__(self):
-        self.__file = _seqioFile("", seqioOpenMode.WRITE, False)
-        self.__mode = seqioOpenMode.WRITE
