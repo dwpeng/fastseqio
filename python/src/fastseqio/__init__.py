@@ -1,3 +1,3 @@
-from .fastseqio import seqioStdinFile, seqioFile, Record
+from .fastseqio import seqioFile, Record
 
-__all__ = ["seqioFile", "seqioStdinFile", "Record"]
+__all__ = ["seqioFile", "Record"]
