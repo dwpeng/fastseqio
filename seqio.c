@@ -202,9 +202,9 @@ seqioStringAppend(seqioString* string, char* data, size_t length)
 {
   if (string->length + length > string->capacity) {
     // Grow capacity more aggressively to reduce allocations
-    size_t newCapacity = string->capacity ? string->capacity : 64;
-    while (newCapacity < string->length + length + 1) {
-      newCapacity *= 2;
+    size_t newCapacity = string->capacity ? string->capacity * 2 : 64;
+    if (newCapacity < string->length + length + 1) {
+      newCapacity = string->length + length + 1;
     }
     kroundup32(newCapacity);
     string->capacity = newCapacity;
