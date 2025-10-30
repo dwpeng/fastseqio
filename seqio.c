@@ -201,7 +201,11 @@ static inline void
 seqioStringAppend(seqioString* string, char* data, size_t length)
 {
   if (string->length + length > string->capacity) {
-    size_t newCapacity = string->length + length + 1;
+    // Grow capacity more aggressively to reduce allocations
+    size_t newCapacity = string->capacity ? string->capacity : 64;
+    while (newCapacity < string->length + length + 1) {
+      newCapacity *= 2;
+    }
     kroundup32(newCapacity);
     string->capacity = newCapacity;
     string->data = (char*)seqioRealloc(string->data, newCapacity);
