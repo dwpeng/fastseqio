@@ -55,17 +55,13 @@ public:
                   seqioString* sequence,
                   seqioString* quality)
   {
-    this->name = std::string();
-    this->name.append(name->data, name->length);
-    this->sequence = std::string();
-    this->sequence.append(sequence->data, sequence->length);
-    if (comment != nullptr) {
-      this->comment = std::string();
-      this->comment.append(comment->data, comment->length);
+    this->name.assign(name->data, name->length);
+    this->sequence.assign(sequence->data, sequence->length);
+    if (comment != nullptr && comment->length > 0) {
+      this->comment.assign(comment->data, comment->length);
     }
-    if (quality != nullptr) {
-      this->quality = std::string();
-      this->quality.append(quality->data, quality->length);
+    if (quality != nullptr && quality->length > 0) {
+      this->quality.assign(quality->data, quality->length);
     }
   }
   seqioRecordImpl(std::string name,
@@ -100,29 +96,25 @@ public:
   void
   set_name(std::string& name)
   {
-    this->name.clear();
-    this->name.append(name);
+    this->name = name;
   }
 
   void
   set_sequence(std::string& sequence)
   {
-    this->sequence.clear();
-    this->sequence.append(sequence);
+    this->sequence = sequence;
   }
 
   void
   set_comment(std::string& comment)
   {
-    this->comment.clear();
-    this->comment.append(comment);
+    this->comment = comment;
   }
 
   void
   set_quality(std::string& quality)
   {
-    this->quality.clear();
-    this->quality.append(quality);
+    this->quality = quality;
   }
 
   std::string
@@ -171,6 +163,7 @@ public:
     }
 
     std::string hpc_sequence;
+    hpc_sequence.reserve(sequence.length()); // Reserve to avoid reallocations
     // compress sequence
     // AAA -> A
     // AAC -> AC
