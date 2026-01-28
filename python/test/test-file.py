@@ -32,12 +32,10 @@ def test_read():
 
 
 def test_write():
-    file = seqioFile("out.fa", "w")
 
-    file.writeFasta("test", "ACGGGGGGGTTTT")
-    file.writeFasta("test", "ACGGGGGGGTTTT")
-
-    file.close()
+    with seqioFile("out.fa", "w") as file:
+        file.writeFasta("test", "ACGGGGGGGTTTT")
+        file.writeFasta("test", "ACGGGGGGGTTTT")
 
     content = ">test\nACGGGGGGGTTTT\n>test\nACGGGGGGGTTTT\n"
 
